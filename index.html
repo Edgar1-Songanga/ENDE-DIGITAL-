@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ENDE+ Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <script src="https://unpkg.com/react-simple-maps@3.0.0/dist/index.umd.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+  .gold-gradient { background: linear-gradient(135deg, #C9A646, #E5C063); }
+  .table-scroll::-webkit-scrollbar { height: 6px; }
+  .table-scroll::-webkit-scrollbar-thumb { background: #C9A646; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+    const { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } = Recharts;
+    const { ComposableMap, Geographies, Geography, Marker } = ReactSimpleMaps;
+
+    const ANGOLA_GEO_URL = "https://raw.githubusercontent.com/deldersveld/topojson/master/countries/angola/angola-provinces.json";
+
+    const COLORS = {
+      white: "#FFFFFF",
+      gold: "#C9A646",
+      navy: "#0F172A",
+      lightGray: "#F8FAFC",
+      green: "#16A34A",
+      red: "#DC2626",
+      yellow: "#EAB308"
+    };
+
+    const mockUsers = [
+      { id: 1, name: "Ana Silva", meter: "AO-104892", type: "Residencial", province: "Luanda", lat: -8.84, lng: 13.23, balance: 12500, debt: 0, status: "Good", score: 92, lastPayment: "2026-03-28" },
+      { id: 2, name: "João Mendes", meter: "AO-204123", type: "Comercial", province: "Benguela", lat: -12.58, lng: 13.40, balance: 0, debt: 48300, status: "Debt", score: 34, lastPayment: "2026-01-10" },
+      { id: 3, name: "Maria Neto", meter: "AO-308901", type: "Residencial", province: "Huambo", lat: -12.77, lng: 15.74, balance: 3200, debt: 8500, status: "Risk", score: 61, lastPayment: "2026-02-15" },
+      { id: 4, name: "Carlos Dias", meter: "AO-402155", type: "Industrial", province: "Cabinda", lat: -5.55, lng: 12.19, balance: 0, debt: 125000, status: "Debt", score: 28, lastPayment: "2025-12-02" },
+      { id: 5, name: "Luisa Gomes", meter: "AO-508734", type: "Residencial", province: "Huíla", lat: -14.92, lng: 13.49, balance: 8900, debt: 0, status: "Good", score: 88, lastPayment: "2026-04-01" },
+    ];
+
+    const mockPayments = [
+      { id: 1, userId: 1, userName: "Ana Silva", amount: 15000, date: "2026-03-28", method: "Multicaixa Express", ref: "REF-1711622400000" },
+      { id: 2, userId: 2, userName: "João Mendes", amount: 20000, date: "2026-01-10", method: "EMIS", ref: "REF-1704857600000" },
+      { id: 3, userId: 3, userName: "Maria Neto", amount: 7500, date: "2026-02-15", method: "Multicaixa Express", ref: "REF-1707955200000" },
+      { id: 4, userId: 5, userName: "Luisa Gomes", amount: 12000, date: "2026-04-01", method: "EMIS", ref: "REF-1711929600000" },
+    ];
+
+    const mockNotifications = [
+      { id: 1, userId: 1, type: "success", msgKey: "paymentConfirmed" },
+      { id: 2, userId: 2, type: "warning", msgKey: "overdueWarning" },
+      { id: 3, userId: 3, type: "info", msgKey: "upcomingPayment" },
+      { id: 4, userId: 4, type: "warning", msgKey: "overdueWarning" },
+      { id: 5, userId: 5, type: "success", msgKey: "paymentConfirmed" },
+    ];
+
+    const mockChats = [
+      { id: 1, customer: "Ana Silva", lastMsg: "Quando chega a fatura?", status: "Open", time: "09:12" },
+      { id: 2, customer: "João Mendes", lastMsg: "Já paguei mas continua cortado", status: "In progress", time: "08:44" },
+      { id: 3, customer: "Maria Neto", lastMsg: "Obrigado pela ajuda", status: "Resolved", time: "Ontem" },
+    ];
+
+    const T = {
+      pt: {
+        appName: "ENDE+ Platform", heroTitle: "Sistema Inteligente de Gestão de Energia",
+        heroSubtitle: "Transformando a cobrança e distribuição de energia em Angola com dados em tempo real",
+        enterPlatform: "Entrar na Plataforma", exploreDemo: "Explorar Demo",
+        stat1: "+35% Aumento de Receita", stat2: "-50% Redução de Filas", stat3: "Monitorização Nacional em Tempo Real",
+        customer: "Cliente", agent: "Agente", admin: "Admin", profile: "Perfil", meterNumber: "Nº do Contador",
+        type: "Tipo", status: "Estado", financialOverview: "Resumo Financeiro", currentBalance: "Saldo Atual",
+        debt: "Dívida", lastPayment: "Último Pagamento", payElectricity: "Pagar Energia",
+        generateReference: "Gerar Referência", notifications: "Notificações",
+        paymentModalTitle: "Pagamento via Multicaixa Express", amount: "Valor", payNow: "Pagar Agora",
+        processing: "Processando...", paymentSuccess: "Pagamento com sucesso", close: "Fechar",
+        paymentConfirmed: "Pagamento confirmado com sucesso", overdueWarning: "Aviso: Fatura em atraso",
+        upcomingPayment: "Lembrete: Pagamento próximo do vencimento", incomingChats: "Conversas",
+        customerPreview: "Detalhe do Cliente", open: "Aberto", inProgress: "Em progresso", resolved: "Resolvido",
+        revenue: "Receita Total", totalDebt: "Dívida Total", paidUsers: "Clientes Pagos", unpaidUsers: "Clientes em Dívida",
+        customers: "Clientes", payments: "Pagamentos", energyScore: "Energy Score", excellent: "Excelente",
+        medium: "Médio", risk: "Risco", darkMode: "Modo Escuro", lightMode: "Modo Claro", good: "Bom",
+        paid: "Pago", users: "utilizadores", province: "Província", debtLevel: "Nível de Dívida",
+        receipt: "Recibo", method: "Método", date: "Data", demoMode: "Modo Demo", overview: "Visão Geral",
+        search: "Pesquisar", name: "Nome", actions: "Ações", view: "Ver", reference: "Referência"
+      },
+      en: {
+        appName: "ENDE+ Platform", heroTitle: "Intelligent Energy Management System",
+        heroSubtitle: "Transforming energy collection and distribution in Angola with real-time data",
+        enterPlatform: "Enter Platform", exploreDemo: "Explore Demo",
+        stat1: "+35% Revenue Increase", stat2: "-50% Queue Reduction", stat3: "Real-time Nationwide Monitoring",
+        customer: "Customer", agent: "Agent", admin: "Admin", profile: "Profile", meterNumber: "Meter Number",
+        type: "Type", status: "Status", financialOverview: "Financial Overview", currentBalance: "Current Balance",
+        debt: "Debt", lastPayment: "Last Payment", payElectricity: "Pay Electricity",
+        generateReference: "Generate Reference", notifications: "Notifications",
+        paymentModalTitle: "Payment via Multicaixa Express", amount: "Amount", payNow: "Pay Now",
+        processing: "Processing...", paymentSuccess: "Payment successful", close: "Close",
+        paymentConfirmed: "Payment confirmed successfully", overdueWarning: "Warning: Invoice overdue",
+        upcomingPayment: "Reminder: Payment due soon", incomingChats: "Incoming Chats",
+        customerPreview: "Customer Preview", open: "Open", inProgress: "In progress", resolved: "Resolved",
+        revenue: "Total Revenue", totalDebt: "Total Debt", paidUsers: "Paid Users", unpaidUsers: "Unpaid Users",
+        customers: "Customers", payments: "Payments", energyScore: "Energy Score", excellent: "Excellent",
+        medium: "Medium", risk: "Risk", darkMode: "Dark Mode", lightMode: "Light Mode", good: "Good",
+        paid: "Paid", users: "users", province: "Province", debtLevel: "Debt Level",
+        receipt: "Receipt", method: "Method", date: "Date", demoMode: "Demo Mode", overview: "Overview",
+        search: "Search", name: "Name", actions: "Actions", view: "View", reference: "Reference"
+      }
+    };
+
+    const api = {
+      login: async (role) => ({ role, token: "demo-token" }),
+      getUsers: async () => mockUsers,
+      getPayments: async () => mockPayments,
+      makePayment: async (userId, amount) => {
+        await new Promise(r => setTimeout(r, 1200));
+        return { success: true, ref: `REF-${Date.now()}`, amount, method: "Multicaixa Express" };
+      },
+      getNotifications: async (userId) => mockNotifications.filter(n => n.userId === userId)
+    };
+
+    function App() {
+      const [lang, setLang] = useState("pt");
+      const [role, setRole] = useState("landing");
+      const [adminTab, setAdminTab] = useState("overview");
+      const [dark, setDark] = useState(false);
+      const [users, setUsers] = useState(mockUsers);
+      const [payments, setPayments] = useState(mockPayments);
+      const [selectedUser, setSelectedUser] = useState(mockUsers[0]);
+      const [showPayment, setShowPayment] = useState(false);
+      const [paymentState, setPaymentState] = useState("idle");
+      const [paymentAmount, setPaymentAmount] = useState(5000);
+      const [lastReceipt, setLastReceipt] = useState(null);
+      const [notifications, setNotifications] = useState([]);
+      const [searchTerm, setSearchTerm] = useState("");
+
+      const t = (key) => T[lang][key];
+
+      useEffect(() => {
+        api.getUsers().then(setUsers);
+        api.getPayments().then(setPayments);
+      }, []);
+
+      useEffect(() => {
+        if (role === "customer") {
+          api.getNotifications(selectedUser.id).then(setNotifications);
+        }
+      }, [role, selectedUser]);
+
+      const adminMetrics = useMemo(() => {
+        const totalRevenue = payments.reduce((s, p) => s + p.amount, 0);
+        const totalDebt = users.reduce((s, u) => s + u.debt, 0);
+        const paidUsers = users.filter(u => u.debt === 0).length;
+        const unpaidUsers = users.length - paidUsers;
+        return { totalRevenue, totalDebt, paidUsers, unpaidUsers };
+      }, [users, payments]);
+
+      const filteredUsers = useMemo(() => {
+        return users.filter(u =>
+          u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.meter.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }, [users, searchTerm]);
+
+      const revenueChartData = [
+        { name: "Jan", value: 120000 }, { name: "Fev", value: 180000 },
+        { name: "Mar", value: 210000 }, { name: "Abr", value: 280000 },
+      ];
+
+      const debtChartData = [
+        { name: "Paid", value: adminMetrics.paidUsers },
+        { name: "Debt", value: adminMetrics.unpaidUsers },
+      ];
+
+      const handlePay = async () => {
+        setPaymentState("processing");
+        const res = await api.makePayment(selectedUser.id, paymentAmount);
+        if (res.success) {
+          const newPayment = {
+            id: payments.length + 1,
+            userId: selectedUser.id,
+            userName: selectedUser.name,
+            amount: paymentAmount,
+            date: new Date().toISOString().split('T')[0],
+            method: res.method,
+            ref: res.ref
+          };
+          setPayments(prev => [newPayment,...prev]);
+          setLastReceipt({...res, date: new Date().toLocaleDateString() });
+          setPaymentState("success");
+          setUsers(prev => prev.map(u => u.id === selectedUser.id? {...u, debt: Math.max(0, u.debt - paymentAmount), balance: u.balance + paymentAmount } : u));
+          setSelectedUser(prev => ({...prev, debt: Math.max(0, prev.debt - paymentAmount), balance: prev.balance + paymentAmount }));
+        }
+      };
+
+      const ScoreBadge = ({ score }) => {
+        const label = score >= 80? t("excellent") : score >= 50? t("medium") : t("risk");
+        const color = score >= 80? COLORS.green : score >= 50? COLORS.yellow : COLORS.red;
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="h-2 rounded-full transition-all duration-500" style={{ width: `${score}%`, backgroundColor: color }}></div>
+            </div>
+            <span className="text-sm font-medium" style={{ color }}>{label}</span>
+          </div>
+        );
+      };
+
+      const StatusBadge = ({ status }) => {
+        const color = status === "Good"? COLORS.green : status === "Risk"? COLORS.yellow : COLORS.red;
+        const text = status === "Good"? t("good") : status === "Risk"? t("risk") : t("debt");
+        return <span className="px-3 py-1 rounded-full text-xs font-medium text-white" style={{ backgroundColor: color }}>{text}</span>;
+      };
+
+      const Card = ({ children, className = "" }) => (
+        <div className={`rounded-2xl p-6 transition-all duration-150 hover:scale-[1.02] ${className}`}
+          style={{ backgroundColor: dark? "#1E293B" : COLORS.white, boxShadow: "0 4px 20px rgba(15,23,42,0.06)" }}>
+          {children}
+        </div>
+      );
+
+      const StatCard = ({ title, value, accent }) => (
+        <Card>
+          <p className="text-sm opacity-70 mb-1">{title}</p>
+          <p className="text-2xl sm:text-3xl font-bold" style={{ color: accent || COLORS.navy }}>{value}</p>
+        </Card>
+      );
+
+      return (
+        <div style={{
+          backgroundColor: dark? COLORS.navy : COLORS.lightGray,
+          color: dark? COLORS.white : COLORS.navy,
+          minHeight: "100vh"
+        }}>
+          <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ backgroundColor: dark? "rgba(15,23,42,0.8)" : "rgba(255,255,255,0.8)", borderColor: dark? "#334155" : "#E2E8F0" }}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg gold-gradient"></div>
+                <span className="font-bold text-lg">{t("appName")}</span>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs" style={{ backgroundColor: dark? "#334155" : "#E2E8F0" }}>
+                  <span>{t("demoMode")}</span>
+                  <select value={role} onChange={e => setRole(e.target.value)} className="bg-transparent font-medium outline-none">
+                    <option value="landing">Landing</option>
+                    <option value="customer">{t("customer")}</option>
+                    <option value="agent">{t("agent")}</option>
+                    <option value="admin">{t("admin")}</option>
+                  </select>
+                </div>
+                <button onClick={() => setDark(!dark)} className="px-3 py-1 rounded-lg text-sm" style={{ backgroundColor: dark? "#334155" : "#E2E8F0" }}>
+                  {dark? t("lightMode") : t("darkMode")}
+                </button>
+                <button onClick={() => setLang(lang === "pt"? "en" : "pt")} className="px-3 py-1 rounded-lg text-sm font-bold text-white gold-gradient">
+                  {lang.toUpperCase()}
+                </button>
+              </div>
+            </div>
+            <div className="sm:hidden px-4 pb-2">
+              <select value={role} onChange={e => setRole(e.target.value)} className="w-full px-3 py-2 rounded-lg text-sm" style={{ backgroundColor: dark? "#334155" : "#E2E8F0" }}>
+                <option value="landing">Landing</option>
+                <option value="customer">{t("customer")}</option>
+                <option value="agent">{t("agent")}</option>
+                <option value="admin">{t("admin")}</option>
+              </select>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+            {role === "landing" && (
+              <div className="space-y-16">
+                <section className="text-center py-12 sm:py-20">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight">{t("heroTitle")}</h1>
+                  <p className="text-lg sm:text-xl opacity-80 max-w-3xl mx-auto mb-10">{t("heroSubtitle")}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
+                    {[t("stat1"), t("stat2"), t("stat3")].map((s, i) => (
+                      <div key={i} className="p-6 rounded-2xl" style={{ backgroundColor: dark? "#1E293B" : COLORS.white, boxShadow: "0 4px 20px rgba(15,23,42,0.06)" }}>
+                        <p className="text-3xl sm:text-4xl font-bold mb-1" style={{ color: COLORS.gold }}>{s.split(" ")[0]}</p>
+                        <p className="text-sm opacity-70">{s.split(" ").slice(1).join(" ")}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onClick={() => setRole("customer")} className="px-8 py-4 rounded-xl font-bold text-white gold-gradient">{t("enterPlatform")}</button>
+                    <button onClick={() => setRole("admin")} className="px-8 py-4 rounded-xl font-bold" style={{ backgroundColor: dark? "#334155" : COLORS.white, border: `2px solid ${COLORS.gold}`, color: COLORS.gold }}>{t("exploreDemo")}</button>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {role === "customer" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-1 space-y-6">
+                  <Card>
+                    <h3 className="font-bold text-lg mb-4">{t("profile")}</h3>
+                    <div className="space-y-3">
+                      <div><p className="text-xs opacity-60">Nome</p><p className="font-medium">{selectedUser.name}</p></div>
+                      <div><p className="text-xs opacity-60">{t("meterNumber")}</p><p className="font-medium">{selectedUser.meter}</p></div>
+                      <div><p className="text-xs opacity-60">{t("type")}</p><p className="font-medium">{selectedUser.type}</p></div>
+                      <div>
+                        <p className="text-xs opacity-60 mb-1">{t("status")}</p>
+                        <StatusBadge status={selectedUser.status} />
+                      </div>
+                    </div>
+                  </Card>
+                  <Card>
+                    <h3 className="font-bold text-lg mb-4">{t("energyScore")}</h3>
+                    <p className="text-4xl font-bold mb-2" style={{ color: COLORS.gold }}>{selectedUser.score}</p>
+                    <ScoreBadge score={selectedUser.score} />
+                  </Card>
+                </div>
+                <div className="lg:col-span-2 space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <StatCard title={t("currentBalance")} value={`${selectedUser.balance.toLocaleString()} Kz`} accent={COLORS.green} />
+                    <StatCard title={t("debt")} value={`${selectedUser.debt.toLocaleString()} Kz`} accent={selectedUser.debt > 0? COLORS.red : COLORS.green} />
+                    <StatCard title={t("lastPayment")} value={selectedUser.lastPayment} />
+                  </div>
+                  <Card>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button onClick={() => setShowPayment(true)} className="flex-1 px-6 py-3 rounded-xl font-bold text-white gold-gradient">{t("payElectricity")}</button>
+                      <button className="flex-1 px-6 py-3 rounded-xl font-bold" style={{ backgroundColor: dark? "#334155" : COLORS.lightGray }}>{t("generateReference")}</button>
+                    </div>
+                  </Card>
+                  <Card>
+                    <h3 className="font-bold text-lg mb-4">{t("notifications")}</h3>
+                    <div className="space-y-3">
+                      {notifications.map(n => (
+                        <div key={n.id} className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: dark? "#334155" : COLORS.lightGray }}>
+                          <div className="w-2 h-2 rounded-full mt-
