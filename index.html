@@ -1,318 +1,747 @@
-<!DOCTYPE html>
-<html lang="pt">
+  <!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>ENDE+ Enterprise</title>
-  
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- React & Recharts Dependencies (Production Builds) -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-  
-  <style>
-    :root {
-      --gold-primary: #C9A646;
-      --gold-secondary: #E5C063;
-      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    
-    body { 
-      font-family: 'Inter', sans-serif; 
-      -webkit-tap-highlight-color: transparent;
-      overscroll-behavior-y: contain;
-      margin: 0;
-      padding: 0;
-    }
-    
-    .gold { background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary)); }
-    .glass { 
-      background: rgba(255, 255, 255, 0.85); 
-      backdrop-filter: blur(12px); 
-      -webkit-backdrop-filter: blur(12px);
-    }
-    
-    .chat-bubble { border-radius: 20px 20px 0 20px; }
-    
-    /* Fix for Recharts in hidden containers */
-    .recharts-responsive-container {
-      min-width: 0;
-    }
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Intelligent Energy Management Platform</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/recharts@2.10.0/dist/Recharts.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* Safe area padding for modern mobile devices */
-    .pb-safe {
-      padding-bottom: calc(6rem + var(--safe-area-inset-bottom));
-    }
-    .bottom-nav {
-      padding-bottom: var(--safe-area-inset-bottom);
-    }
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --gold: #d4af37;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --light-bg: #f8fafc;
+            --light-card: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #f1f5f9;
+            --border-dark: #334155;
+            --border-light: #e2e8f0;
+        }
 
-    /* Simple animations */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.3s ease-out forwards;
-    }
-  </style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.light-mode {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .dark-mode .glass-effect {
+            background: rgba(15, 23, 42, 0.4);
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .gold-accent {
+            color: var(--gold);
+        }
+
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .card-shadow {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            padding: 10px 20px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .btn-secondary {
+            color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dark-mode .btn-secondary:hover {
+            background: var(--gold);
+            color: var(--dark-bg);
+        }
+
+        .status-active {
+            color: #10b981;
+        }
+
+        .status-warning {
+            color: #f59e0b;
+        }
+
+        .status-critical {
+            color: #ef4444;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--light-card);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .dark-mode .modal-content {
+            background: var(--dark-card);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--light-card);
+            border: 1px solid var(--border-light);
+        }
+
+        .dark-mode .stat-card {
+            background: var(--dark-card);
+            border-color: var(--border-dark);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dark-mode .stat-label {
+            color: #94a3b8;
+        }
+
+        .ticket-item {
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            background: var(--light-card);
+            border-radius: 4px;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .ticket-item {
+            background: var(--dark-card);
+            border-color: var(--gold);
+        }
+
+        .ticket-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .ticket-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .alert-banner {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+
+        .alert-critical {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            color: #166534;
+        }
+
+        .dark-mode .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fcd34d;
+        }
+
+        .dark-mode .alert-critical {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+        }
+
+        .dark-mode .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+        }
+
+        .navbar {
+            background: var(--light-card);
+            border-bottom: 1px solid var(--border-light);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dark-mode .navbar {
+            background: var(--dark-card);
+            border-color: var(--border-dark);
+        }
+
+        .navbar-brand {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .navbar-brand .gold {
+            color: var(--gold);
+        }
+
+        .navbar-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .language-selector, .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: var(--text-dark);
+        }
+
+        .dark-mode .language-selector, .dark-mode .theme-toggle {
+            border-color: var(--border-dark);
+            color: var(--text-light);
+        }
+
+        .language-selector:hover, .theme-toggle:hover {
+            background: var(--light-bg);
+            border-color: var(--primary);
+        }
+
+        .dark-mode .language-selector:hover, .dark-mode .theme-toggle:hover {
+            background: var(--dark-bg);
+            border-color: var(--gold);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--light-card);
+            border-right: 1px solid var(--border-light);
+            padding: 20px;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 70px;
+        }
+
+        .dark-mode .sidebar {
+            background: var(--dark-card);
+            border-color: var(--border-dark);
+        }
+
+        .sidebar-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 8px 0;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar-item:hover {
+            background: var(--light-bg);
+            color: var(--primary);
+        }
+
+        .dark-mode .sidebar-item:hover {
+            background: var(--dark-bg);
+            color: var(--gold);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            margin-top: 70px;
+            padding: 30px;
+            min-height: calc(100vh - 70px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+                display: none;
+            }
+
+            .sidebar.mobile-open {
+                display: block;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .navbar {
+                padding: 15px 20px;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+            background: var(--light-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .dark-mode .chat-container {
+            background: var(--dark-card);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+        }
+
+        .chat-message.bot {
+            align-self: flex-start;
+            background: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        .dark-mode .chat-message.bot {
+            background: var(--dark-bg);
+            color: var(--text-light);
+        }
+
+        .chat-input {
+            padding: 15px;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 10px;
+        }
+
+        .dark-mode .chat-input {
+            border-color: var(--border-dark);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        .dark-mode .chat-input input {
+            background: var(--dark-bg);
+            border-color: var(--border-dark);
+            color: var(--text-light);
+        }
+
+        .faq-item {
+            margin: 15px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .dark-mode .faq-item {
+            border-color: var(--border-dark);
+        }
+
+        .faq-header {
+            padding: 15px;
+            background: var(--light-bg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .dark-mode .faq-header {
+            background: var(--dark-bg);
+        }
+
+        .faq-header:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dark-mode .faq-header:hover {
+            background: var(--gold);
+            color: var(--dark-bg);
+        }
+
+        .faq-content {
+            padding: 15px;
+            background: var(--light-card);
+            border-top: 1px solid var(--border-light);
+            display: none;
+        }
+
+        .dark-mode .faq-content {
+            background: var(--dark-card);
+            border-color: var(--border-dark);
+        }
+
+        .faq-content.open {
+            display: block;
+        }
+
+        .footer {
+            background: var(--light-card);
+            border-top: 1px solid var(--border-light);
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .dark-mode .footer {
+            background: var(--dark-card);
+            border-color: var(--border-dark);
+        }
+
+        .footer-text {
+            font-size: 14px;
+            color: #64748b;
+            margin: 10px 0;
+        }
+
+        .dark-mode .footer-text {
+            color: #94a3b8;
+        }
+
+        .footer-tagline {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 15px;
+        }
+
+        .footer-tagline .gold {
+            color: var(--gold);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-critical {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .dark-mode .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        .dark-mode .badge-warning {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        .dark-mode .badge-critical {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--light-bg);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .energy-gauge {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 20px auto;
+        }
+
+        .gauge-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0deg, var(--primary) var(--percentage), var(--light-bg) var(--percentage));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .dark-mode .gauge-circle {
+            background: conic-gradient(var(--gold) 0deg, var(--gold) var(--percentage), var(--dark-bg) var(--percentage));
+            color: var(--gold);
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-<div id="root"></div>
+<body class="light-mode">
+    <div id="root"></div>
 
-<script>
-// Standard JavaScript (No Babel required)
-const e = React.createElement;
-const { useState, useEffect, useMemo, useCallback } = React;
-const { AreaChart, Area, ResponsiveContainer, XAxis } = Recharts;
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
 
-function App() {
-  const [view, setView] = useState('landing');
-  const [role, setRole] = useState('customer');
-  const [balance, setBalance] = useState(8000);
-  const [debt, setDebt] = useState(12000);
-  const [isPaying, setIsPaying] = useState(false);
-  const [power, setPower] = useState(true);
-  const [showChat, setShowChat] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  
-  const chartData = useMemo(() => 
-    Array.from({length: 12}, (_, i) => ({
-      name: i,
-      v: Math.floor(Math.random() * 40) + 60
-    })), []
-  );
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setBalance(prev => {
-        if(prev <= 0) {
-          setDebt(d => d + 50);
-          return 0;
-        }
-        return prev - 20;
-      });
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    setPower(balance > 0 && debt < 25000);
-  }, [balance, debt]);
-
-  const pay = useCallback(() => {
-    if (isPaying) return;
-    setIsPaying(true);
-    setTimeout(() => {
-      setDebt(prevDebt => {
-        const paymentAmount = 10000;
-        if (prevDebt > 0) {
-          const toDebt = Math.min(prevDebt, paymentAmount);
-          const remaining = paymentAmount - toDebt;
-          setBalance(b => b + remaining);
-          return prevDebt - toDebt;
-        } else {
-          setBalance(b => b + paymentAmount);
-          return 0;
-        }
-      });
-      setIsPaying(false);
-      setNotifications(prev => ["Pagamento de 10.000 Kz confirmado!", ...prev].slice(0, 5));
-    }, 1500);
-  }, [isPaying]);
-
-  if (view === 'landing') {
-    return e('div', { className: 'min-h-screen flex flex-col items-center justify-center gold text-white px-6' },
-      e('div', { className: 'bg-white/20 p-8 md:p-12 rounded-[40px] backdrop-blur-md border border-white/30 text-center w-full max-w-sm shadow-2xl animate-fade-in' },
-        e('div', { className: 'w-20 h-20 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-[#C9A646] shadow-xl' }, 'E+'),
-        e('h1', { className: 'text-3xl font-bold mb-2 tracking-tighter' }, 'ENDE+ Pro'),
-        e('p', { className: 'mb-8 opacity-90 text-sm' }, 'Gestão Inteligente de Energia Angola'),
-        e('div', { className: 'space-y-3' },
-          e('button', { 
-            onClick: () => { setRole('customer'); setView('app'); },
-            className: 'w-full bg-white text-black py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:bg-slate-50'
-          }, 'Sou Cliente'),
-          e('button', { 
-            onClick: () => { setRole('admin'); setView('app'); },
-            className: 'w-full bg-black/20 text-white py-4 rounded-2xl font-bold border border-white/30 active:scale-95 transition-all hover:bg-black/30'
-          }, 'Administração')
-        )
-      ),
-      e('p', { className: 'mt-8 text-[10px] uppercase tracking-widest opacity-60' }, '© 2024 ENDE EP - Angola')
-    );
-  }
-
-  const header = e('header', { className: 'glass sticky top-0 p-4 border-b flex justify-between items-center z-50' },
-    e('h2', { className: 'font-black text-xl tracking-tighter cursor-pointer', onClick: () => setView('landing') },
-      'ENDE', e('span', { className: 'text-[#C9A646]' }, '+')
-    ),
-    e('div', { className: 'flex items-center gap-3' },
-      e('span', { className: 'text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-1 rounded uppercase tracking-widest' }, 
-        role === 'customer' ? 'Cliente' : 'Admin'
-      ),
-      e('div', { className: 'flex items-center gap-1.5' },
-        e('div', { className: `w-2.5 h-2.5 rounded-full ${power ? 'bg-green-500' : 'bg-red-500'} shadow-sm` }),
-        e('span', { className: 'text-[10px] font-bold text-slate-400 uppercase' }, power ? 'Online' : 'Offline')
-      )
-    )
-  );
-
-  const customerView = e('div', { className: 'space-y-6 animate-fade-in' },
-    e('div', { className: 'gold text-white p-8 rounded-[35px] shadow-2xl relative overflow-hidden' },
-      e('div', { className: 'relative z-10' },
-        e('p', { className: 'text-xs font-bold opacity-80 uppercase mb-1' }, 'Saldo Disponível'),
-        e('div', { className: 'flex items-baseline gap-2 mb-6' },
-          e('h2', { className: 'text-5xl font-black' }, balance.toLocaleString()),
-          e('span', { className: 'text-xl font-bold opacity-70' }, 'Kz')
-        ),
-        e('div', { className: 'flex justify-between items-center border-t border-white/20 pt-5' },
-          e('div', null,
-            e('p', { className: 'text-[10px] uppercase opacity-70 font-bold' }, 'Dívida Acumulada'),
-            e('p', { className: 'font-bold text-lg' }, debt.toLocaleString() + ' Kz')
-          ),
-          e('button', { 
-            onClick: pay, 
-            disabled: isPaying,
-            className: `bg-white text-black px-6 py-3 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all ${isPaying ? 'opacity-70' : ''}`
-          }, isPaying ? 'Processando...' : 'Recarregar')
-        )
-      ),
-      e('div', { className: 'absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-3xl' }),
-      e('div', { className: 'absolute -left-10 -bottom-10 w-40 h-40 bg-black/5 rounded-full blur-3xl' })
-    ),
-    e('div', { className: 'bg-white p-6 rounded-3xl shadow-sm border border-slate-100' },
-      e('div', { className: 'flex justify-between items-center mb-6' },
-        e('div', null,
-          e('h3', { className: 'font-black text-slate-800' }, 'Consumo Energético'),
-          e('p', { className: 'text-[10px] text-slate-400 font-bold uppercase' }, 'Últimas 12 horas')
-        ),
-        e('span', { className: 'text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100 animate-pulse' }, 'LIVE')
-      ),
-      e('div', { className: 'h-48 w-full' },
-        e(ResponsiveContainer, { width: '100%', height: '100%' },
-          e(AreaChart, { data: chartData },
-            e('defs', null,
-              e('linearGradient', { id: 'colorValue', x1: '0', y1: '0', x2: '0', y2: '1' },
-                e('stop', { offset: '5%', stopColor: '#C9A646', stopOpacity: 0.3 }),
-                e('stop', { offset: '95%', stopColor: '#C9A646', stopOpacity: 0 })
-              )
-            ),
-            e(Area, { 
-              type: 'monotone', 
-              dataKey: 'v', 
-              stroke: '#C9A646', 
-              fillOpacity: 1, 
-              fill: 'url(#colorValue)', 
-              strokeWidth: 3 
-            })
-          )
-        )
-      )
-    ),
-    notifications.length > 0 && e('div', { className: 'space-y-3' },
-      e('h4', { className: 'text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest' }, 'Histórico de Transações'),
-      notifications.map((n, i) => e('div', { key: i, className: 'bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center' },
-        e('div', { className: 'flex items-center gap-3' },
-          e('div', { className: 'w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-600' }, '✓'),
-          e('span', { className: 'text-xs font-bold text-slate-700' }, n)
-        ),
-        e('button', { className: 'text-[10px] font-bold text-[#C9A646] hover:underline' }, 'RECIBO PDF')
-      ))
-    )
-  );
-
-  const adminView = e('div', { className: 'space-y-6 animate-fade-in' },
-    e('div', { className: 'grid grid-cols-2 gap-4' },
-      [
-        {l:"Receita (Hoje)", v:"12.4M", c:"text-green-600", i:"💰"},
-        {l:"Cortes Activos", v:"1,204", c:"text-red-500", i:"⚠️"},
-        {l:"Dívida Nacional", v:"482M", c:"text-slate-800", i:"📊"},
-        {l:"Agentes Campo", v:"84", c:"text-[#C9A646]", i:"👷"}
-      ].map((s, i) => e('div', { key: i, className: 'bg-white p-5 rounded-3xl border border-slate-100 shadow-sm' },
-        e('div', { className: 'flex justify-between items-start mb-2' },
-          e('p', { className: 'text-[10px] font-bold text-slate-400 uppercase' }, s.l),
-          e('span', { className: 'text-sm' }, s.i)
-        ),
-        e('p', { className: `text-2xl font-black ${s.c}` }, s.v)
-      ))
-    ),
-    e('div', { className: 'bg-white p-6 rounded-3xl border border-slate-100 shadow-sm' },
-      e('h3', { className: 'font-black mb-4 uppercase text-[10px] tracking-widest text-slate-400' }, 'Estado das Províncias'),
-      e('div', { className: 'grid gap-3' },
-        ['Luanda','Benguela','Huambo','Cabinda'].map(p => e('div', { key: p, className: 'flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100' },
-          e('span', { className: 'font-bold text-sm text-slate-700' }, p),
-          e('div', { className: 'flex gap-1.5' },
-            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm' }),
-            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm' }),
-            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-sm' })
-          )
-        ))
-      )
-    )
-  );
-
-  const chatBot = e('div', { className: 'fixed bottom-24 right-6 z-50 flex flex-col items-end' },
-    showChat && e('div', { className: 'bg-white w-72 h-96 shadow-2xl rounded-[30px] border border-slate-100 flex flex-col overflow-hidden mb-4 animate-fade-in' },
-      e('div', { className: 'gold p-5 text-white font-bold flex justify-between items-center' },
-        e('div', { className: 'flex items-center gap-2' },
-          e('div', { className: 'w-2 h-2 bg-green-400 rounded-full animate-pulse' }),
-          e('span', { className: 'text-sm' }, 'Assistente E+')
-        ),
-        e('button', { onClick: () => setShowChat(false), className: 'opacity-70' }, '✕')
-      ),
-      e('div', { className: 'flex-1 p-4 space-y-4 overflow-y-auto bg-slate-50' },
-        e('div', { className: 'bg-white p-3 rounded-2xl rounded-bl-none text-xs w-5/6 shadow-sm border border-slate-100' },
-          'Olá! Sou o assistente virtual da ENDE. Como posso ajudar com o seu contador hoje?'
-        ),
-        isPaying && e('div', { className: 'bg-[#C9A646] text-white p-3 rounded-2xl rounded-br-none text-xs ml-auto w-5/6 shadow-md' },
-          'Estou a realizar um carregamento agora.'
-        )
-      ),
-      e('div', { className: 'p-3 bg-white border-t' },
-        e('div', { className: 'bg-slate-100 rounded-full px-4 py-2 text-[10px] text-slate-400 font-bold' }, 'Escreva uma mensagem...')
-      )
-    ),
-    e('button', { 
-      onClick: () => setShowChat(!showChat), 
-      className: 'w-14 h-14 gold rounded-full shadow-2xl flex items-center justify-center text-2xl text-white active:scale-90 transition-all'
-    }, showChat ? '✕' : '💬')
-  );
-
-  const nav = e('nav', { className: 'fixed bottom-0 left-0 right-0 glass border-t border-slate-200 flex justify-around items-center z-40 bottom-nav h-20' },
-    e('button', { className: 'flex flex-col items-center gap-1 px-4' },
-      e('span', { className: 'text-xl' }, '🏠'),
-      e('span', { className: 'text-[10px] font-bold text-[#C9A646]' }, 'Painel')
-    ),
-    e('button', { className: 'flex flex-col items-center gap-1 px-4 opacity-40' },
-      e('span', { className: 'text-xl' }, '⚡'),
-      e('span', { className: 'text-[10px] font-bold' }, 'Serviços')
-    ),
-    e('button', { className: 'flex flex-col items-center gap-1 px-4 opacity-40' },
-      e('span', { className: 'text-xl' }, '⚙️'),
-      e('span', { className: 'text-[10px] font-bold' }, 'Ajustes')
-    )
-  );
-
-  return e('div', { className: 'min-h-screen bg-slate-50 flex flex-col' },
-    header,
-    e('main', { className: 'flex-1 p-4 space-y-6 max-w-2xl mx-auto w-full pb-safe' },
-      role === 'customer' ? customerView : adminView
-    ),
-    chatBot,
-    nav
-  );
-}
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(e(App));
-</script>
-</body>
-</html>
+        // Translations
+        const translations = {
+            pt: {
+                // Navigation
+                customerPortal: 'Portal do Cliente',
+                adminDashboard: 'Dashboard Admin',
+                callCenter: 'Central de Atendimento',
+                logout: 'Sair',
+                
+                // Top Bar
+                language: 'Idioma',
+                theme: 'Tema',
+                darkMode: '🌙 Escuro',
+                lightMode: '☀️ Claro',
+                
+                // Customer Portal
+                customerId: 'ID do Medidor',
+                customerName: 'Nome do Cliente',
+                customerType: 'Tipo de Cliente',
+                province: 'Província',
+                balance: 'Saldo',
+                debt: 'Dívida',
+                energyUsage: 'Consumo de Energia',
+                energyReserve: 'Reserva de Energia',
+                status: 'Status',
+                riskScore: 'Pontuação de Risco',
+                active: 'Ativo',
+                cutOff: 'Desconectado',
+                
+                // Energy Monitoring
+                realTimeEnergy: 'Monitoramento de Energia em Tempo Real',
+                currentWatts: 'Watts Atuais',
+                reserveWatts: 'Watts de Reserva',
+                overloadWarning: 'Aviso de Sobrecarga',
+                noOverload: 'Sem Sobrecarga',
+                overloadDetected: 'Sobrecarga Detectada',
+                
+                // Alerts
+                alerts: 'Alertas',
+                lowBalance: 'Saldo Baixo',
+                highDebt: 'Dívida Alta',
+                overloadRisk: 'Risco de Sobrecarga',
+                disconnectionRisk: 'Risco de Desconexão',
+                recommendations: 'Recomendações',
+                reduceLoad: 'Reduza a carga elétrica',
+                rechargeAccount: 'Recarregue sua conta',
+                contactSupport: 'Entre em contato com o suporte',
+                
+                // Payment
+                payment: 'Pagamento',
+                entity: 'Entidade',
+                reference: 'Referência',
+                amount: 'Valor',
+                pay: 'Pagar',
+                paymentSuccess: 'Pagamento realizado com sucesso!',
+                
+                // Employee Management
+                employees: 'Funcionários',
+                role: 'Cargo',
+                assignedZones: 'Zonas Atribuídas',
+                activeTasks: 'Tarefas Ativas',
+                technician: 'Técnico',
+                supervisor: 'Supervisor',
+                admin: 'Administrador',
+                callCenterAgent: 'Agente de Call Center',
+                
+                // Admin Dashboard
+                dashboard: 'Dashboard',
+                revenueRecovered: 'Receita Recuperada',
+                totalDebt: 'Dívida Total',
+                
