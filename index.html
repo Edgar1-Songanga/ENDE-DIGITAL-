@@ -2,193 +2,212 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ENDE+ Inteligente</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>ENDE+ Enterprise</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <style>
-    body { font-family: sans-serif; }
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .gold { background: linear-gradient(135deg,#C9A646,#E5C063); }
+    .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+    .chat-bubble { border-radius: 20px 20px 0 20px; }
   </style>
 </head>
-
-<body class="bg-slate-100">
+<body class="bg-slate-50">
 <div id="root"></div>
 
 <script type="text/babel">
-
 const { useState, useEffect, useMemo } = React;
-const { AreaChart, Area, ResponsiveContainer, Tooltip } = Recharts;
+const { AreaChart, Area, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis } = Recharts;
 
 function App(){
+  const [view, setView] = useState('landing');
+  const [role, setRole] = useState('customer');
+  const [balance, setBalance] = useState(8000);
+  const [debt, setDebt] = useState(12000);
+  const [isPaying, setIsPaying] = useState(false);
+  const [power, setPower] = useState(true);
+  const [showChat, setShowChat] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
-  const [view,setView] = useState('landing');
-  const [role,setRole] = useState('customer');
-
-  const [balance,setBalance] = useState(8000);
-  const [debt,setDebt] = useState(12000);
-
-  const [isPaying,setIsPaying] = useState(false);
-  const [power,setPower] = useState(true);
-
-  // consumo automático seguro
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      setBalance(prev=>{
-        if(prev <= 0){
-          setDebt(d => d + Math.floor(Math.random()*300));
+  // Auto-Consumption logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBalance(prev => {
+        if(prev <= 0) {
+          setDebt(d => d + 50);
           return 0;
         }
-
-        const use = Math.floor(Math.random()*200);
-        const next = prev - use;
-
-        if(next <= 0){
-          setDebt(d => d + Math.abs(next));
-          return 0;
-        }
-
-        return next;
+        return prev - 20;
       });
-    },4000);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
-    return ()=>clearInterval(interval);
-  },[]);
+  useEffect(() => {
+    setPower(balance > 0 && debt < 25000);
+  }, [balance, debt]);
 
-  // lógica energia
-  useEffect(()=>{
-    if(balance <= 0 || debt > 20000){
-      setPower(false);
-    } else {
-      setPower(true);
-    }
-  },[balance,debt]);
-
-  // score cliente
-  const score = useMemo(()=>{
-    if(debt < 5000) return "Bom";
-    if(debt < 15000) return "Risco";
-    return "Crítico";
-  },[debt]);
-
-  // gráfico
-  const chart = useMemo(()=>{
-    return Array.from({length:7},(_,i)=>({
-      day:`Dia ${i+1}`,
-      kwh: Math.floor(Math.random()*60)+10
-    }));
-  },[]);
-
-  // pagamento
-  const pay = ()=>{
-    if(isPaying) return;
-
+  const pay = () => {
     setIsPaying(true);
-
-    setTimeout(()=>{
-      let amount = 10000;
-
-      if(debt > 0){
-        if(amount >= debt){
-          amount -= debt;
-          setDebt(0);
-          setBalance(b=>b+amount);
-        }else{
-          setDebt(d=>d-amount);
-        }
-      }else{
-        setBalance(b=>b+amount);
+    setTimeout(() => {
+      if(debt > 0) {
+        const toDebt = Math.min(debt, 10000);
+        setDebt(d => d - toDebt);
+        setBalance(b => b + (10000 - toDebt));
+      } else {
+        setBalance(b => b + 10000);
       }
-
       setIsPaying(false);
-    },1500);
+      setNotifications(["Pagamento de 10.000 Kz confirmado!", ...notifications]);
+    }, 1500);
   };
 
   if(view === 'landing'){
     return (
-      <div className="h-screen flex items-center justify-center gold text-white text-center">
-        <div>
-          <h1 className="text-4xl font-bold mb-6">ENDE+ Inteligente</h1>
-          <button onClick={()=>{setRole('customer');setView('app')}} className="bg-white text-black px-6 py-3 m-2 rounded">Cliente</button>
-          <button onClick={()=>{setRole('admin');setView('app')}} className="bg-black text-white px-6 py-3 m-2 rounded">Admin</button>
+      <div className="h-screen flex flex-col items-center justify-center gold text-white px-6">
+        <div className="bg-white/20 p-10 rounded-[40px] backdrop-blur-md border border-white/30 text-center w-full max-w-sm">
+          <div className="w-20 h-20 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-[#C9A646] shadow-xl">E+</div>
+          <h1 className="text-3xl font-bold mb-2 tracking-tighter">ENDE+ Pro</h1>
+          <p className="mb-8 opacity-80 text-sm">Gestão Inteligente de Energia Angola</p>
+          <button onClick={()=>{setRole('customer');setView('app')}} className="w-full bg-white text-black py-4 rounded-2xl font-bold mb-3 shadow-lg active:scale-95 transition">Sou Cliente</button>
+          <button onClick={()=>{setRole('admin');setView('app')}} className="w-full bg-black/30 text-white py-4 rounded-2xl font-bold border border-white/20 active:scale-95 transition">Administração</button>
         </div>
       </div>
     );
   }
 
   return(
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen pb-24">
+      {/* Header */}
+      <header className="glass sticky top-0 p-4 border-b flex justify-between items-center z-50">
+        <h2 className="font-black text-xl tracking-tighter" onClick={()=>setView('landing')}>ENDE<span className="text-[#C9A646]">+</span></h2>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold bg-slate-200 px-2 py-1 rounded uppercase tracking-widest">{role}</span>
+          <div className={`w-3 h-3 rounded-full ${power ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}></div>
+        </div>
+      </header>
 
-      {role === 'customer' && (
-        <div className="max-w-xl mx-auto space-y-6">
-
-          <div className="gold text-white p-6 rounded-3xl">
-
-            <h2 className="text-4xl font-bold">{balance} Kz</h2>
-            <p>Dívida: {debt} Kz</p>
-
-            <p className={power ? "text-green-200" : "text-red-300"}>
-              {power ? "Energia Activa" : "Energia Cortada"}
-            </p>
-
-            <p>Score: {score}</p>
-
-            <button onClick={pay} className="mt-4 bg-white text-black px-5 py-2 rounded">
-              {isPaying ? "Processando..." : "Pagar (Multicaixa)"}
-            </button>
-
-          </div>
-
-          <div className="bg-white p-4 rounded-xl">
-            <h3 className="font-bold mb-2">Consumo</h3>
-
-            <div style={{height:200}}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chart}>
-                  <Area dataKey="kwh" stroke="#C9A646" fill="#C9A64633"/>
-                  <Tooltip/>
-                </AreaChart>
-              </ResponsiveContainer>
+      <div className="p-4 space-y-6 max-w-2xl mx-auto">
+        {role === 'customer' ? (
+          <>
+            <div className="gold text-white p-8 rounded-[35px] shadow-2xl relative overflow-hidden">
+              <p className="text-xs font-bold opacity-70 uppercase mb-1">Saldo em Kwanza</p>
+              <h2 className="text-5xl font-black mb-4">{balance.toLocaleString()}</h2>
+              <div className="flex justify-between items-end border-t border-white/20 pt-4">
+                <div>
+                  <p className="text-[10px] uppercase opacity-70">Dívida Acumulada</p>
+                  <p className="font-bold">{debt.toLocaleString()} Kz</p>
+                </div>
+                <button onClick={pay} className="bg-white text-black px-6 py-3 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition">
+                  {isPaying ? "A processar..." : "Carregar +"}
+                </button>
+              </div>
+              <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
             </div>
 
-          </div>
-
-        </div>
-      )}
-
-      {role === 'admin' && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-          {[
-            {l:"Receita Recuperada",v:"5.2M Kz"},
-            {l:"Dívida Total",v:"120M Kz"},
-            {l:"Cortes Automáticos",v:"8,421"},
-            {l:"Perdas Evitadas",v:"3.8M Kz"}
-          ].map((s,i)=>(
-            <div key={i} className="bg-white p-4 rounded-xl">
-              <p className="text-xs">{s.l}</p>
-              <p className="font-bold">{s.v}</p>
+            <div className="bg-white p-6 rounded-3xl shadow-sm border">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-black text-slate-800">Consumo em Tempo Real</h3>
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded">LIVE</span>
+              </div>
+              <div className="h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={Array.from({length:10},(_,i)=>({v:Math.random()*100}))}>
+                    <Area type="monotone" dataKey="v" stroke="#C9A646" fill="#C9A64622" strokeWidth={3} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          ))}
+            
+            {notifications.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase ml-2">Histórico Recente</h4>
+                {notifications.map((n,i) => (
+                  <div key={i} className="bg-green-50 border border-green-100 p-4 rounded-2xl text-xs font-bold text-green-700 flex justify-between">
+                    <span>{n}</span>
+                    <span className="opacity-50 underline">Baixar PDF</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="space-y-6">
+             <div className="grid grid-cols-2 gap-4">
+              {[
+                {l:"Receita (Hoje)", v:"12.4M", c:"text-green-600"},
+                {l:"Cortes Activos", v:"1,204", c:"text-red-500"},
+                {l:"Dívida Nacional", v:"482M", c:"text-slate-800"},
+                {l:"Agentes Campo", v:"84", c:"text-[#C9A646]"}
+              ].map((s,i)=>(
+                <div key={i} className="bg-white p-5 rounded-3xl border shadow-sm">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{s.l}</p>
+                  <p className={`text-2xl font-black ${s.c}`}>{s.v}</p>
+                </div>
+              ))}
+            </div>
 
-        </div>
-      )}
+            <div className="bg-white p-6 rounded-3xl border shadow-sm">
+              <h3 className="font-black mb-4 uppercase text-xs tracking-widest text-slate-400">Estado das Províncias</h3>
+              <div className="space-y-3">
+                {['Luanda','Benguela','Huambo','Cabinda'].map(p => (
+                  <div key={p} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                    <span className="font-bold text-sm">{p}</span>
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
+      {/* Floating Chat Bot */}
+      <div className="fixed bottom-24 right-6 z-50">
+        {showChat && (
+          <div className="bg-white w-72 h-96 shadow-2xl rounded-3xl border flex flex-col overflow-hidden mb-4 animate-bounce-in">
+            <div className="gold p-4 text-white font-bold flex justify-between">
+              <span>Assistente E+</span>
+              <button onClick={()=>setShowChat(false)}>✕</button>
+            </div>
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-slate-50">
+              <div className="bg-slate-200 p-3 rounded-2xl rounded-bl-none text-xs w-3/4">Olá! Como posso ajudar com o seu contador hoje?</div>
+              {isPaying && <div className="bg-[#C9A646] text-white p-3 chat-bubble text-xs ml-auto w-3/4">Estou a realizar um carregamento agora.</div>}
+            </div>
+          </div>
+        )}
+        <button onClick={()=>setShowChat(!showChat)} className="w-16 h-16 gold rounded-full shadow-2xl flex items-center justify-center text-2xl text-white active:scale-90 transition-transform">💬</button>
+      </div>
+
+      {/* Mobile Bottom Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 glass border-t p-4 flex justify-around items-center z-40">
+        <button className="flex flex-col items-center gap-1">
+          <span className="text-xl">🏠</span>
+          <span className="text-[10px] font-bold text-[#C9A646]">Painel</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 opacity-30">
+          <span className="text-xl">⚡</span>
+          <span className="text-[10px] font-bold">Serviços</span>
+        </button>
+        <button className="flex flex-col items-center gap-1 opacity-30">
+          <span className="text-xl">⚙️</span>
+          <span className="text-[10px] font-bold">Ajustes</span>
+        </button>
+      </nav>
     </div>
   );
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App/>);
-
 </script>
 </body>
 </html>
