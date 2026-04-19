@@ -13,11 +13,10 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- React & Recharts Dependencies -->
+  <!-- React & Recharts Dependencies (Production Builds) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
   <style>
     :root {
@@ -30,6 +29,8 @@
       font-family: 'Inter', sans-serif; 
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: contain;
+      margin: 0;
+      padding: 0;
     }
     
     .gold { background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary)); }
@@ -40,10 +41,6 @@
     }
     
     .chat-bubble { border-radius: 20px 20px 0 20px; }
-    
-    /* Smooth transitions */
-    .fade-enter { opacity: 0; transform: translateY(10px); }
-    .fade-enter-active { opacity: 1; transform: translateY(0); transition: all 0.3s ease; }
     
     /* Fix for Recharts in hidden containers */
     .recharts-responsive-container {
@@ -57,16 +54,27 @@
     .bottom-nav {
       padding-bottom: var(--safe-area-inset-bottom);
     }
+
+    /* Simple animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
 <div id="root"></div>
 
-<script type="text/babel">
+<script>
+// Standard JavaScript (No Babel required)
+const e = React.createElement;
 const { useState, useEffect, useMemo, useCallback } = React;
-const { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } = Recharts;
+const { AreaChart, Area, ResponsiveContainer, XAxis } = Recharts;
 
-function App(){
+function App() {
   const [view, setView] = useState('landing');
   const [role, setRole] = useState('customer');
   const [balance, setBalance] = useState(8000);
@@ -76,7 +84,6 @@ function App(){
   const [showChat, setShowChat] = useState(false);
   const [notifications, setNotifications] = useState([]);
   
-  // Mock chart data
   const chartData = useMemo(() => 
     Array.from({length: 12}, (_, i) => ({
       name: i,
@@ -84,7 +91,6 @@ function App(){
     })), []
   );
 
-  // Auto-Consumption logic
   useEffect(() => {
     const timer = setInterval(() => {
       setBalance(prev => {
@@ -105,8 +111,6 @@ function App(){
   const pay = useCallback(() => {
     if (isPaying) return;
     setIsPaying(true);
-    
-    // Simulate network delay
     setTimeout(() => {
       setDebt(prevDebt => {
         const paymentAmount = 10000;
@@ -120,240 +124,195 @@ function App(){
           return 0;
         }
       });
-      
       setIsPaying(false);
       setNotifications(prev => ["Pagamento de 10.000 Kz confirmado!", ...prev].slice(0, 5));
     }, 1500);
   }, [isPaying]);
 
-  if(view === 'landing'){
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gold text-white px-6">
-        <div className="bg-white/20 p-8 md:p-12 rounded-[40px] backdrop-blur-md border border-white/30 text-center w-full max-w-sm shadow-2xl">
-          <div className="w-20 h-20 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-[#C9A646] shadow-xl">E+</div>
-          <h1 className="text-3xl font-bold mb-2 tracking-tighter">ENDE+ Pro</h1>
-          <p className="mb-8 opacity-90 text-sm">Gestão Inteligente de Energia Angola</p>
-          
-          <div className="space-y-3">
-            <button 
-              onClick={()=>{setRole('customer');setView('app')}} 
-              className="w-full bg-white text-black py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:bg-slate-50"
-            >
-              Sou Cliente
-            </button>
-            <button 
-              onClick={()=>{setRole('admin');setView('app')}} 
-              className="w-full bg-black/20 text-white py-4 rounded-2xl font-bold border border-white/30 active:scale-95 transition-all hover:bg-black/30"
-            >
-              Administração
-            </button>
-          </div>
-        </div>
-        <p className="mt-8 text-[10px] uppercase tracking-widest opacity-60">© 2024 ENDE EP - Angola</p>
-      </div>
+  if (view === 'landing') {
+    return e('div', { className: 'min-h-screen flex flex-col items-center justify-center gold text-white px-6' },
+      e('div', { className: 'bg-white/20 p-8 md:p-12 rounded-[40px] backdrop-blur-md border border-white/30 text-center w-full max-w-sm shadow-2xl animate-fade-in' },
+        e('div', { className: 'w-20 h-20 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black text-[#C9A646] shadow-xl' }, 'E+'),
+        e('h1', { className: 'text-3xl font-bold mb-2 tracking-tighter' }, 'ENDE+ Pro'),
+        e('p', { className: 'mb-8 opacity-90 text-sm' }, 'Gestão Inteligente de Energia Angola'),
+        e('div', { className: 'space-y-3' },
+          e('button', { 
+            onClick: () => { setRole('customer'); setView('app'); },
+            className: 'w-full bg-white text-black py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all hover:bg-slate-50'
+          }, 'Sou Cliente'),
+          e('button', { 
+            onClick: () => { setRole('admin'); setView('app'); },
+            className: 'w-full bg-black/20 text-white py-4 rounded-2xl font-bold border border-white/30 active:scale-95 transition-all hover:bg-black/30'
+          }, 'Administração')
+        )
+      ),
+      e('p', { className: 'mt-8 text-[10px] uppercase tracking-widest opacity-60' }, '© 2024 ENDE EP - Angola')
     );
   }
 
-  return(
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Header */}
-      <header className="glass sticky top-0 p-4 border-b flex justify-between items-center z-50">
-        <h2 className="font-black text-xl tracking-tighter cursor-pointer" onClick={()=>setView('landing')}>
-          ENDE<span className="text-[#C9A646]">+</span>
-        </h2>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-1 rounded uppercase tracking-widest">
-            {role === 'customer' ? 'Cliente' : 'Admin'}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <div className={`w-2.5 h-2.5 rounded-full ${power ? 'bg-green-500' : 'bg-red-500'} shadow-sm`}></div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase">{power ? 'Online' : 'Offline'}</span>
-          </div>
-        </div>
-      </header>
+  const header = e('header', { className: 'glass sticky top-0 p-4 border-b flex justify-between items-center z-50' },
+    e('h2', { className: 'font-black text-xl tracking-tighter cursor-pointer', onClick: () => setView('landing') },
+      'ENDE', e('span', { className: 'text-[#C9A646]' }, '+')
+    ),
+    e('div', { className: 'flex items-center gap-3' },
+      e('span', { className: 'text-[10px] font-bold bg-slate-200 text-slate-600 px-2 py-1 rounded uppercase tracking-widest' }, 
+        role === 'customer' ? 'Cliente' : 'Admin'
+      ),
+      e('div', { className: 'flex items-center gap-1.5' },
+        e('div', { className: `w-2.5 h-2.5 rounded-full ${power ? 'bg-green-500' : 'bg-red-500'} shadow-sm` }),
+        e('span', { className: 'text-[10px] font-bold text-slate-400 uppercase' }, power ? 'Online' : 'Offline')
+      )
+    )
+  );
 
-      <main className="flex-1 p-4 space-y-6 max-w-2xl mx-auto w-full pb-safe">
-        {role === 'customer' ? (
-          <div className="space-y-6">
-            {/* Balance Card */}
-            <div className="gold text-white p-8 rounded-[35px] shadow-2xl relative overflow-hidden">
-              <div className="relative z-10">
-                <p className="text-xs font-bold opacity-80 uppercase mb-1">Saldo Disponível</p>
-                <div className="flex items-baseline gap-2 mb-6">
-                  <h2 className="text-5xl font-black">{balance.toLocaleString()}</h2>
-                  <span className="text-xl font-bold opacity-70">Kz</span>
-                </div>
-                
-                <div className="flex justify-between items-center border-t border-white/20 pt-5">
-                  <div>
-                    <p className="text-[10px] uppercase opacity-70 font-bold">Dívida Acumulada</p>
-                    <p className="font-bold text-lg">{debt.toLocaleString()} Kz</p>
-                  </div>
-                  <button 
-                    onClick={pay} 
-                    disabled={isPaying}
-                    className={`bg-white text-black px-6 py-3 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all ${isPaying ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-2xl'}`}
-                  >
-                    {isPaying ? (
-                      <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Processando
-                      </span>
-                    ) : "Recarregar"}
-                  </button>
-                </div>
-              </div>
-              {/* Decorative circles */}
-              <div className="absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-              <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-black/5 rounded-full blur-3xl"></div>
-            </div>
+  const customerView = e('div', { className: 'space-y-6 animate-fade-in' },
+    e('div', { className: 'gold text-white p-8 rounded-[35px] shadow-2xl relative overflow-hidden' },
+      e('div', { className: 'relative z-10' },
+        e('p', { className: 'text-xs font-bold opacity-80 uppercase mb-1' }, 'Saldo Disponível'),
+        e('div', { className: 'flex items-baseline gap-2 mb-6' },
+          e('h2', { className: 'text-5xl font-black' }, balance.toLocaleString()),
+          e('span', { className: 'text-xl font-bold opacity-70' }, 'Kz')
+        ),
+        e('div', { className: 'flex justify-between items-center border-t border-white/20 pt-5' },
+          e('div', null,
+            e('p', { className: 'text-[10px] uppercase opacity-70 font-bold' }, 'Dívida Acumulada'),
+            e('p', { className: 'font-bold text-lg' }, debt.toLocaleString() + ' Kz')
+          ),
+          e('button', { 
+            onClick: pay, 
+            disabled: isPaying,
+            className: `bg-white text-black px-6 py-3 rounded-2xl font-black text-sm shadow-xl active:scale-95 transition-all ${isPaying ? 'opacity-70' : ''}`
+          }, isPaying ? 'Processando...' : 'Recarregar')
+        )
+      ),
+      e('div', { className: 'absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-3xl' }),
+      e('div', { className: 'absolute -left-10 -bottom-10 w-40 h-40 bg-black/5 rounded-full blur-3xl' })
+    ),
+    e('div', { className: 'bg-white p-6 rounded-3xl shadow-sm border border-slate-100' },
+      e('div', { className: 'flex justify-between items-center mb-6' },
+        e('div', null,
+          e('h3', { className: 'font-black text-slate-800' }, 'Consumo Energético'),
+          e('p', { className: 'text-[10px] text-slate-400 font-bold uppercase' }, 'Últimas 12 horas')
+        ),
+        e('span', { className: 'text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100 animate-pulse' }, 'LIVE')
+      ),
+      e('div', { className: 'h-48 w-full' },
+        e(ResponsiveContainer, { width: '100%', height: '100%' },
+          e(AreaChart, { data: chartData },
+            e('defs', null,
+              e('linearGradient', { id: 'colorValue', x1: '0', y1: '0', x2: '0', y2: '1' },
+                e('stop', { offset: '5%', stopColor: '#C9A646', stopOpacity: 0.3 }),
+                e('stop', { offset: '95%', stopColor: '#C9A646', stopOpacity: 0 })
+              )
+            ),
+            e(Area, { 
+              type: 'monotone', 
+              dataKey: 'v', 
+              stroke: '#C9A646', 
+              fillOpacity: 1, 
+              fill: 'url(#colorValue)', 
+              strokeWidth: 3 
+            })
+          )
+        )
+      )
+    ),
+    notifications.length > 0 && e('div', { className: 'space-y-3' },
+      e('h4', { className: 'text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest' }, 'Histórico de Transações'),
+      notifications.map((n, i) => e('div', { key: i, className: 'bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center' },
+        e('div', { className: 'flex items-center gap-3' },
+          e('div', { className: 'w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-600' }, '✓'),
+          e('span', { className: 'text-xs font-bold text-slate-700' }, n)
+        ),
+        e('button', { className: 'text-[10px] font-bold text-[#C9A646] hover:underline' }, 'RECIBO PDF')
+      ))
+    )
+  );
 
-            {/* Chart Card */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <h3 className="font-black text-slate-800">Consumo Energético</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Últimas 12 horas</p>
-                </div>
-                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100 animate-pulse">LIVE</span>
-              </div>
-              <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#C9A646" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#C9A646" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <Area 
-                      type="monotone" 
-                      dataKey="v" 
-                      stroke="#C9A646" 
-                      fillOpacity={1} 
-                      fill="url(#colorValue)" 
-                      strokeWidth={3} 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            
-            {/* Notifications */}
-            {notifications.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase ml-2 tracking-widest">Histórico de Transações</h4>
-                {notifications.map((n, i) => (
-                  <div key={i} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm flex justify-between items-center group hover:border-[#C9A646]/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-green-50 rounded-full flex items-center justify-center text-green-600">✓</div>
-                      <span className="text-xs font-bold text-slate-700">{n}</span>
-                    </div>
-                    <button className="text-[10px] font-bold text-[#C9A646] hover:underline">RECIBO PDF</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6">
-             <div className="grid grid-cols-2 gap-4">
-              {[
-                {l:"Receita (Hoje)", v:"12.4M", c:"text-green-600", i:"💰"},
-                {l:"Cortes Activos", v:"1,204", c:"text-red-500", i:"⚠️"},
-                {l:"Dívida Nacional", v:"482M", c:"text-slate-800", i:"📊"},
-                {l:"Agentes Campo", v:"84", c:"text-[#C9A646]", i:"👷"}
-              ].map((s,i)=>(
-                <div key={i} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase">{s.l}</p>
-                    <span className="text-sm">{s.i}</span>
-                  </div>
-                  <p className={`text-2xl font-black ${s.c}`}>{s.v}</p>
-                </div>
-              ))}
-            </div>
+  const adminView = e('div', { className: 'space-y-6 animate-fade-in' },
+    e('div', { className: 'grid grid-cols-2 gap-4' },
+      [
+        {l:"Receita (Hoje)", v:"12.4M", c:"text-green-600", i:"💰"},
+        {l:"Cortes Activos", v:"1,204", c:"text-red-500", i:"⚠️"},
+        {l:"Dívida Nacional", v:"482M", c:"text-slate-800", i:"📊"},
+        {l:"Agentes Campo", v:"84", c:"text-[#C9A646]", i:"👷"}
+      ].map((s, i) => e('div', { key: i, className: 'bg-white p-5 rounded-3xl border border-slate-100 shadow-sm' },
+        e('div', { className: 'flex justify-between items-start mb-2' },
+          e('p', { className: 'text-[10px] font-bold text-slate-400 uppercase' }, s.l),
+          e('span', { className: 'text-sm' }, s.i)
+        ),
+        e('p', { className: `text-2xl font-black ${s.c}` }, s.v)
+      ))
+    ),
+    e('div', { className: 'bg-white p-6 rounded-3xl border border-slate-100 shadow-sm' },
+      e('h3', { className: 'font-black mb-4 uppercase text-[10px] tracking-widest text-slate-400' }, 'Estado das Províncias'),
+      e('div', { className: 'grid gap-3' },
+        ['Luanda','Benguela','Huambo','Cabinda'].map(p => e('div', { key: p, className: 'flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100' },
+          e('span', { className: 'font-bold text-sm text-slate-700' }, p),
+          e('div', { className: 'flex gap-1.5' },
+            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm' }),
+            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm' }),
+            e('div', { className: 'w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-sm' })
+          )
+        ))
+      )
+    )
+  );
 
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-              <h3 className="font-black mb-4 uppercase text-[10px] tracking-widest text-slate-400">Estado das Províncias</h3>
-              <div className="grid gap-3">
-                {['Luanda','Benguela','Huambo','Cabinda'].map(p => (
-                  <div key={p} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <span className="font-bold text-sm text-slate-700">{p}</span>
-                    <div className="flex gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse shadow-sm"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
+  const chatBot = e('div', { className: 'fixed bottom-24 right-6 z-50 flex flex-col items-end' },
+    showChat && e('div', { className: 'bg-white w-72 h-96 shadow-2xl rounded-[30px] border border-slate-100 flex flex-col overflow-hidden mb-4 animate-fade-in' },
+      e('div', { className: 'gold p-5 text-white font-bold flex justify-between items-center' },
+        e('div', { className: 'flex items-center gap-2' },
+          e('div', { className: 'w-2 h-2 bg-green-400 rounded-full animate-pulse' }),
+          e('span', { className: 'text-sm' }, 'Assistente E+')
+        ),
+        e('button', { onClick: () => setShowChat(false), className: 'opacity-70' }, '✕')
+      ),
+      e('div', { className: 'flex-1 p-4 space-y-4 overflow-y-auto bg-slate-50' },
+        e('div', { className: 'bg-white p-3 rounded-2xl rounded-bl-none text-xs w-5/6 shadow-sm border border-slate-100' },
+          'Olá! Sou o assistente virtual da ENDE. Como posso ajudar com o seu contador hoje?'
+        ),
+        isPaying && e('div', { className: 'bg-[#C9A646] text-white p-3 rounded-2xl rounded-br-none text-xs ml-auto w-5/6 shadow-md' },
+          'Estou a realizar um carregamento agora.'
+        )
+      ),
+      e('div', { className: 'p-3 bg-white border-t' },
+        e('div', { className: 'bg-slate-100 rounded-full px-4 py-2 text-[10px] text-slate-400 font-bold' }, 'Escreva uma mensagem...')
+      )
+    ),
+    e('button', { 
+      onClick: () => setShowChat(!showChat), 
+      className: 'w-14 h-14 gold rounded-full shadow-2xl flex items-center justify-center text-2xl text-white active:scale-90 transition-all'
+    }, showChat ? '✕' : '💬')
+  );
 
-      {/* Floating Chat Bot */}
-      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end">
-        {showChat && (
-          <div className="bg-white w-72 h-96 shadow-2xl rounded-[30px] border border-slate-100 flex flex-col overflow-hidden mb-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div className="gold p-5 text-white font-bold flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-sm">Assistente E+</span>
-              </div>
-              <button onClick={()=>setShowChat(false)} className="opacity-70 hover:opacity-100">✕</button>
-            </div>
-            <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-slate-50">
-              <div className="bg-white p-3 rounded-2xl rounded-bl-none text-xs w-5/6 shadow-sm border border-slate-100">
-                Olá! Sou o assistente virtual da ENDE. Como posso ajudar com o seu contador hoje?
-              </div>
-              {isPaying && (
-                <div className="bg-[#C9A646] text-white p-3 rounded-2xl rounded-br-none text-xs ml-auto w-5/6 shadow-md">
-                  Estou a realizar um carregamento agora.
-                </div>
-              )}
-            </div>
-            <div className="p-3 bg-white border-t">
-              <div className="bg-slate-100 rounded-full px-4 py-2 text-[10px] text-slate-400 font-bold">
-                Escreva uma mensagem...
-              </div>
-            </div>
-          </div>
-        )}
-        <button 
-          onClick={()=>setShowChat(!showChat)} 
-          className="w-14 h-14 gold rounded-full shadow-2xl flex items-center justify-center text-2xl text-white active:scale-90 transition-all hover:scale-105"
-        >
-          {showChat ? '✕' : '💬'}
-        </button>
-      </div>
+  const nav = e('nav', { className: 'fixed bottom-0 left-0 right-0 glass border-t border-slate-200 flex justify-around items-center z-40 bottom-nav h-20' },
+    e('button', { className: 'flex flex-col items-center gap-1 px-4' },
+      e('span', { className: 'text-xl' }, '🏠'),
+      e('span', { className: 'text-[10px] font-bold text-[#C9A646]' }, 'Painel')
+    ),
+    e('button', { className: 'flex flex-col items-center gap-1 px-4 opacity-40' },
+      e('span', { className: 'text-xl' }, '⚡'),
+      e('span', { className: 'text-[10px] font-bold' }, 'Serviços')
+    ),
+    e('button', { className: 'flex flex-col items-center gap-1 px-4 opacity-40' },
+      e('span', { className: 'text-xl' }, '⚙️'),
+      e('span', { className: 'text-[10px] font-bold' }, 'Ajustes')
+    )
+  );
 
-      {/* Mobile Bottom Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-slate-200 flex justify-around items-center z-40 bottom-nav h-20">
-        <button className="flex flex-col items-center gap-1 px-4">
-          <span className="text-xl">🏠</span>
-          <span className="text-[10px] font-bold text-[#C9A646]">Painel</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 px-4 opacity-40 hover:opacity-100 transition-opacity">
-          <span className="text-xl">⚡</span>
-          <span className="text-[10px] font-bold">Serviços</span>
-        </button>
-        <button className="flex flex-col items-center gap-1 px-4 opacity-40 hover:opacity-100 transition-opacity">
-          <span className="text-xl">⚙️</span>
-          <span className="text-[10px] font-bold">Ajustes</span>
-        </button>
-      </nav>
-    </div>
+  return e('div', { className: 'min-h-screen bg-slate-50 flex flex-col' },
+    header,
+    e('main', { className: 'flex-1 p-4 space-y-6 max-w-2xl mx-auto w-full pb-safe' },
+      role === 'customer' ? customerView : adminView
+    ),
+    chatBot,
+    nav
   );
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App/>);
+root.render(e(App));
 </script>
 </body>
-  </html>
-  
+</html>
