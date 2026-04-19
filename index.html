@@ -1,747 +1,146 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>National Intelligent Energy Management Platform</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Energy Management Platform</title>
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/recharts@2.10.0/dist/Recharts.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
-            --gold: #d4af37;
-            --dark-bg: #0f172a;
-            --dark-card: #1e293b;
-            --light-bg: #f8fafc;
-            --light-card: #ffffff;
-            --text-dark: #0f172a;
-            --text-light: #f1f5f9;
-            --border-dark: #334155;
-            --border-light: #e2e8f0;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        body.light-mode {
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-        }
-
-        body.dark-mode {
-            background-color: var(--dark-bg);
-            color: var(--text-light);
-        }
-
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-        }
-
-        .dark-mode .glass-effect {
-            background: rgba(15, 23, 42, 0.4);
-            border-color: rgba(148, 163, 184, 0.2);
-        }
-
-        .gold-accent {
-            color: var(--gold);
-        }
-
-        .smooth-transition {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card-shadow {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-mode .card-shadow {
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(30, 64, 175, 0.3);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--primary);
-            padding: 10px 20px;
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .dark-mode .btn-secondary {
-            color: var(--gold);
-            border-color: var(--gold);
-        }
-
-        .btn-secondary:hover {
-            background: var(--primary);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #0f172a;
             color: white;
         }
 
-        .dark-mode .btn-secondary:hover {
-            background: var(--gold);
-            color: var(--dark-bg);
-        }
-
-        .status-active {
-            color: #10b981;
-        }
-
-        .status-warning {
-            color: #f59e0b;
-        }
-
-        .status-critical {
-            color: #ef4444;
-        }
-
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .animate-slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: var(--light-card);
-            border-radius: 12px;
+        .container {
             padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
         }
 
-        .dark-mode .modal-content {
-            background: var(--dark-card);
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
 
-        .chart-container {
-            width: 100%;
-            height: 300px;
-            margin: 20px 0;
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #60a5fa;
         }
 
-        .grid-2 {
+        .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            padding: 20px;
-            border-radius: 12px;
-            background: var(--light-card);
-            border: 1px solid var(--border-light);
-        }
-
-        .dark-mode .stat-card {
-            background: var(--dark-card);
-            border-color: var(--border-dark);
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .dark-mode .stat-label {
-            color: #94a3b8;
-        }
-
-        .ticket-item {
-            padding: 15px;
-            border-left: 4px solid var(--primary);
-            background: var(--light-card);
-            border-radius: 4px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .dark-mode .ticket-item {
-            background: var(--dark-card);
-            border-color: var(--gold);
-        }
-
-        .ticket-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-mode .ticket-item:hover {
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .alert-banner {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-warning {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            color: #92400e;
-        }
-
-        .alert-critical {
-            background: #fee2e2;
-            border-left: 4px solid #ef4444;
-            color: #7f1d1d;
-        }
-
-        .alert-success {
-            background: #dcfce7;
-            border-left: 4px solid #10b981;
-            color: #166534;
-        }
-
-        .dark-mode .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #fcd34d;
-        }
-
-        .dark-mode .alert-critical {
-            background: rgba(239, 68, 68, 0.1);
-            color: #fca5a5;
-        }
-
-        .dark-mode .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #6ee7b7;
-        }
-
-        .navbar {
-            background: var(--light-card);
-            border-bottom: 1px solid var(--border-light);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .dark-mode .navbar {
-            background: var(--dark-card);
-            border-color: var(--border-dark);
-        }
-
-        .navbar-brand {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .navbar-brand .gold {
-            color: var(--gold);
-        }
-
-        .navbar-controls {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .language-selector, .theme-toggle {
-            background: transparent;
-            border: 1px solid var(--border-light);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            color: var(--text-dark);
-        }
-
-        .dark-mode .language-selector, .dark-mode .theme-toggle {
-            border-color: var(--border-dark);
-            color: var(--text-light);
-        }
-
-        .language-selector:hover, .theme-toggle:hover {
-            background: var(--light-bg);
-            border-color: var(--primary);
-        }
-
-        .dark-mode .language-selector:hover, .dark-mode .theme-toggle:hover {
-            background: var(--dark-bg);
-            border-color: var(--gold);
-        }
-
-        .sidebar {
-            width: 250px;
-            background: var(--light-card);
-            border-right: 1px solid var(--border-light);
-            padding: 20px;
-            height: calc(100vh - 70px);
-            overflow-y: auto;
-            position: fixed;
-            left: 0;
-            top: 70px;
-        }
-
-        .dark-mode .sidebar {
-            background: var(--dark-card);
-            border-color: var(--border-dark);
-        }
-
-        .sidebar-item {
-            padding: 12px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 8px 0;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .sidebar-item:hover {
-            background: var(--light-bg);
-            color: var(--primary);
-        }
-
-        .dark-mode .sidebar-item:hover {
-            background: var(--dark-bg);
-            color: var(--gold);
-        }
-
-        .sidebar-item.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            margin-top: 70px;
-            padding: 30px;
-            min-height: calc(100vh - 70px);
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 100%;
-                height: auto;
-                position: relative;
-                top: 0;
-                border-right: none;
-                border-bottom: 1px solid var(--border-light);
-                display: none;
-            }
-
-            .sidebar.mobile-open {
-                display: block;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 20px;
-            }
-
-            .navbar {
-                padding: 15px 20px;
-            }
-
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 500px;
-            background: var(--light-card);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .dark-mode .chat-container {
-            background: var(--dark-card);
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
             gap: 15px;
         }
 
-        .chat-message {
-            padding: 12px 15px;
-            border-radius: 8px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-
-        .chat-message.user {
-            align-self: flex-end;
-            background: var(--primary);
-            color: white;
-        }
-
-        .chat-message.bot {
-            align-self: flex-start;
-            background: var(--light-bg);
-            color: var(--text-dark);
-        }
-
-        .dark-mode .chat-message.bot {
-            background: var(--dark-bg);
-            color: var(--text-light);
-        }
-
-        .chat-input {
+        .stat {
+            background: #0b1220;
             padding: 15px;
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            gap: 10px;
+            border-radius: 10px;
         }
 
-        .dark-mode .chat-input {
-            border-color: var(--border-dark);
+        .value {
+            font-size: 20px;
+            color: #fbbf24;
+            font-weight: bold;
         }
 
-        .chat-input input {
-            flex: 1;
+        button {
+            background: #2563eb;
+            border: none;
             padding: 10px 15px;
-            border: 1px solid var(--border-light);
             border-radius: 8px;
-            font-size: 14px;
-            background: var(--light-bg);
-            color: var(--text-dark);
-        }
-
-        .dark-mode .chat-input input {
-            background: var(--dark-bg);
-            border-color: var(--border-dark);
-            color: var(--text-light);
-        }
-
-        .faq-item {
-            margin: 15px 0;
-            border: 1px solid var(--border-light);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .dark-mode .faq-item {
-            border-color: var(--border-dark);
-        }
-
-        .faq-header {
-            padding: 15px;
-            background: var(--light-bg);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .dark-mode .faq-header {
-            background: var(--dark-bg);
-        }
-
-        .faq-header:hover {
-            background: var(--primary);
             color: white;
+            cursor: pointer;
         }
 
-        .dark-mode .faq-header:hover {
-            background: var(--gold);
-            color: var(--dark-bg);
-        }
-
-        .faq-content {
-            padding: 15px;
-            background: var(--light-card);
-            border-top: 1px solid var(--border-light);
-            display: none;
-        }
-
-        .dark-mode .faq-content {
-            background: var(--dark-card);
-            border-color: var(--border-dark);
-        }
-
-        .faq-content.open {
-            display: block;
-        }
-
-        .footer {
-            background: var(--light-card);
-            border-top: 1px solid var(--border-light);
-            padding: 30px;
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        .dark-mode .footer {
-            background: var(--dark-card);
-            border-color: var(--border-dark);
-        }
-
-        .footer-text {
-            font-size: 14px;
-            color: #64748b;
-            margin: 10px 0;
-        }
-
-        .dark-mode .footer-text {
-            color: #94a3b8;
-        }
-
-        .footer-tagline {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 15px;
-        }
-
-        .footer-tagline .gold {
-            color: var(--gold);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-critical {
-            background: #fee2e2;
-            color: #7f1d1d;
-        }
-
-        .dark-mode .badge-success {
-            background: rgba(16, 185, 129, 0.2);
-            color: #6ee7b7;
-        }
-
-        .dark-mode .badge-warning {
-            background: rgba(245, 158, 11, 0.2);
-            color: #fcd34d;
-        }
-
-        .dark-mode .badge-critical {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-        }
-
-        .loading-spinner {
-            border: 3px solid var(--light-bg);
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .energy-gauge {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 20px auto;
-        }
-
-        .gauge-circle {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(var(--primary) 0deg, var(--primary) var(--percentage), var(--light-bg) var(--percentage));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 24px;
-            color: var(--primary);
-        }
-
-        .dark-mode .gauge-circle {
-            background: conic-gradient(var(--gold) 0deg, var(--gold) var(--percentage), var(--dark-bg) var(--percentage));
-            color: var(--gold);
+        button:hover {
+            background: #1d4ed8;
         }
     </style>
 </head>
-<body class="light-mode">
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<body>
+<div id="root"></div>
 
-        // Translations
-        const translations = {
-            pt: {
-                // Navigation
-                customerPortal: 'Portal do Cliente',
-                adminDashboard: 'Dashboard Admin',
-                callCenter: 'Central de Atendimento',
-                logout: 'Sair',
-                
-                // Top Bar
-                language: 'Idioma',
-                theme: 'Tema',
-                darkMode: '🌙 Escuro',
-                lightMode: '☀️ Claro',
-                
-                // Customer Portal
-                customerId: 'ID do Medidor',
-                customerName: 'Nome do Cliente',
-                customerType: 'Tipo de Cliente',
-                province: 'Província',
-                balance: 'Saldo',
-                debt: 'Dívida',
-                energyUsage: 'Consumo de Energia',
-                energyReserve: 'Reserva de Energia',
-                status: 'Status',
-                riskScore: 'Pontuação de Risco',
-                active: 'Ativo',
-                cutOff: 'Desconectado',
-                
-                // Energy Monitoring
-                realTimeEnergy: 'Monitoramento de Energia em Tempo Real',
-                currentWatts: 'Watts Atuais',
-                reserveWatts: 'Watts de Reserva',
-                overloadWarning: 'Aviso de Sobrecarga',
-                noOverload: 'Sem Sobrecarga',
-                overloadDetected: 'Sobrecarga Detectada',
-                
-                // Alerts
-                alerts: 'Alertas',
-                lowBalance: 'Saldo Baixo',
-                highDebt: 'Dívida Alta',
-                overloadRisk: 'Risco de Sobrecarga',
-                disconnectionRisk: 'Risco de Desconexão',
-                recommendations: 'Recomendações',
-                reduceLoad: 'Reduza a carga elétrica',
-                rechargeAccount: 'Recarregue sua conta',
-                contactSupport: 'Entre em contato com o suporte',
-                
-                // Payment
-                payment: 'Pagamento',
-                entity: 'Entidade',
-                reference: 'Referência',
-                amount: 'Valor',
-                pay: 'Pagar',
-                paymentSuccess: 'Pagamento realizado com sucesso!',
-                
-                // Employee Management
-                employees: 'Funcionários',
-                role: 'Cargo',
-                assignedZones: 'Zonas Atribuídas',
-                activeTasks: 'Tarefas Ativas',
-                technician: 'Técnico',
-                supervisor: 'Supervisor',
-                admin: 'Administrador',
-                callCenterAgent: 'Agente de Call Center',
-                
-                // Admin Dashboard
-                dashboard: 'Dashboard',
-                revenueRecovered: 'Receita Recuperada',
-                totalDebt: 'Dívida Total',
-                
+<script type="text/babel">
+
+const App = () => {
+
+    const [watts, setWatts] = React.useState(320);
+    const [reserve, setReserve] = React.useState(500);
+    const [status, setStatus] = React.useState("Normal");
+
+    const checkEnergy = () => {
+        if (watts > reserve) {
+            setStatus("⚠️ Sobrecarga detectada");
+        } else {
+            setStatus("✅ Sistema estável");
+        }
+    };
+
+    return (
+        <div className="container">
+
+            <div className="card">
+                <div className="title">⚡ Energy Management System</div>
+                <p>Sistema inteligente de monitoramento energético</p>
+            </div>
+
+            <div className="card">
+                <div className="title">📊 Dados em tempo real</div>
+
+                <div className="grid">
+                    <div className="stat">
+                        <div>Consumo Atual</div>
+                        <div className="value">{watts} W</div>
+                    </div>
+
+                    <div className="stat">
+                        <div>Reserva</div>
+                        <div className="value">{reserve} W</div>
+                    </div>
+
+                    <div className="stat">
+                        <div>Status</div>
+                        <div className="value">{status}</div>
+                    </div>
+                </div>
+
+                <div style={{ marginTop: 20 }}>
+                    <button onClick={checkEnergy}>
+                        Verificar Sistema
+                    </button>
+                </div>
+            </div>
+
+            <div className="card">
+                <div className="title">🔧 Simulação de Ajuste</div>
+
+                <button onClick={() => setWatts(watts + 50)}>
+                    Aumentar Consumo
+                </button>
+
+                <button onClick={() => setWatts(watts - 50)} style={{ marginLeft: 10 }}>
+                    Reduzir Consumo
+                </button>
+            </div>
+
+        </div>
+    );
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+
+</script>
+</body>
+</html>
