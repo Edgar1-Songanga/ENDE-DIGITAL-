@@ -1,261 +1,194 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ENDE+ Enterprise v2.0</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ENDE+ Inteligente</title>
 
-  <!-- Tailwind CDN corrigido -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React 18 + ReactDOM: URLs completas -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-  <!-- Recharts: URL completa -->
   <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.min.js"></script>
 
-  <!-- Babel Standalone: necessário pro type="text/babel" -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-    * { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-   .gold-gradient { background: linear-gradient(135deg, #C9A646, #E5C063); }
-   .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
-   .dark.glass { background: rgba(15, 23, 42, 0.8); }
-   .map-province { transition: all 0.3s ease; cursor: pointer; }
-   .map-province:hover { fill: #C9A646!important; opacity: 0.8; }
-   .status-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-   .custom-scroll::-webkit-scrollbar { width: 4px; }
-   .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    body { font-family: sans-serif; }
+    .gold { background: linear-gradient(135deg,#C9A646,#E5C063); }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 overflow-hidden">
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-    const { AreaChart, Area, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } = Recharts;
+<body class="bg-slate-100">
+<div id="root"></div>
 
-    const PROVINCES = [
-      { id: 'LU', name: 'Luanda', status: 'Stable', load: 85 },
-      { id: 'BE', name: 'Benguela', status: 'Stable', load: 62 },
-      { id: 'HU', name: 'Huambo', status: 'Outage', load: 0 },
-      { id: 'CA', name: 'Cabinda', status: 'Stable', load: 45 },
-      { id: 'HL', name: 'Huíla', status: 'Stable', load: 58 }
-    ];
+<script type="text/babel">
 
-    function App() {
-      const [view, setView] = useState('landing');
-      const [role, setRole] = useState('customer');
-      const [dark, setDark] = useState(false);
-      const [balance, setBalance] = useState(12500);
-      const [isPaying, setIsPaying] = useState(false);
-      const [selectedProvince, setSelectedProvince] = useState(PROVINCES[0]);
+const { useState, useEffect, useMemo } = React;
+const { AreaChart, Area, ResponsiveContainer, Tooltip } = Recharts;
 
-      // Simulation: Auto-updating consumption
-      const consumptionData = useMemo(() =>
-        Array.from({length: 7}, (_, i) => ({ day: `Dia ${i+1}`, kwh: Math.floor(Math.random() * 50) + 10 })), []);
+function App(){
 
-      const handlePayment = () => {
-        setIsPaying(true);
-        setTimeout(() => {
-          setBalance(prev => prev + 5000);
-          setIsPaying(false);
-          alert("Pagamento processado! Saldo atualizado.");
-        }, 1500);
-      };
+  const [view,setView] = useState('landing');
+  const [role,setRole] = useState('customer');
 
-      if (view === 'landing') return (
-        <div className="h-screen w-full gold-gradient flex items-center justify-center p-6 text-white">
-          <div className="max-w-md w-full space-y-12 text-center">
-            <div className="w-24 h-24 bg-white rounded-[32px] mx-auto flex items-center justify-center text-4xl font-black text-[#C9A646] shadow-2xl animate-bounce">E+</div>
-            <div className="space-y-4">
-              <h1 className="text-4xl font-black">ENDE+ Enterprise</h1>
-              <p className="opacity-80 font-medium">Solução Unificada de Gestão Energética para Angola</p>
-            </div>
-            <div className="grid gap-3">
-              <button onClick={() => {setRole('customer'); setView('app')}} className="w-full py-4 bg-white text-[#C9A646] rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">Portal do Cliente</button>
-              <button onClick={() => {setRole('admin'); setView('app')}} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition">Painel Administrativo</button>
-            </div>
-            <p className="text-xs opacity-60 uppercase tracking-widest font-bold">Versão 2.0.1 • Sistema em Tempo Real</p>
-          </div>
-        </div>
-      );
+  const [balance,setBalance] = useState(8000);
+  const [debt,setDebt] = useState(12000);
 
-      return (
-        <div className={dark? 'dark' : ''}>
-          <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col transition-colors duration-500">
+  const [isPaying,setIsPaying] = useState(false);
+  const [power,setPower] = useState(true);
 
-            {/* Unified Navbar */}
-            <nav className="glass border-b dark:border-slate-800 px-6 py-4 flex justify-between items-center z-50">
-              <div className="flex items-center gap-3" onClick={() => setView('landing')}>
-                <div className="w-8 h-8 gold-gradient rounded-lg flex items-center justify-center text-white font-bold cursor-pointer">E</div>
-                <span className="font-black text-xl tracking-tighter dark:text-white">ENDE<span className="text-[#C9A646]">+</span></span>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="hidden md:block text-right">
-                  <p className="text-[10px] font-bold uppercase text-slate-400">Modo</p>
-                  <p className="text-xs font-bold dark:text-white">{role === 'admin'? 'Administrador' : 'Cliente'}</p>
-                </div>
-                <button onClick={() => setDark(!dark)} className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xl">
-                  {dark? '☀️' : '🌙'}
-                </button>
-              </div>
-            </nav>
+  // consumo automático seguro
+  useEffect(()=>{
+    const interval = setInterval(()=>{
+      setBalance(prev=>{
+        if(prev <= 0){
+          setDebt(d => d + Math.floor(Math.random()*300));
+          return 0;
+        }
 
-            <div className="flex-1 overflow-y-auto custom-scroll p-4 md:p-8 space-y-8 pb-32">
+        const use = Math.floor(Math.random()*200);
+        const next = prev - use;
 
-              {role === 'customer'? (
-                <>
-                  {/* Customer Portal */}
-                  <div className="max-w-4xl mx-auto space-y-6">
-                    <div className="gold-gradient p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6">
-                      <div className="z-10 text-center md:text-left">
-                        <p className="text-sm font-bold opacity-80 uppercase tracking-widest">Saldo Disponível</p>
-                        <h2 className="text-6xl font-black my-2">{balance.toLocaleString()}<span className="text-2xl font-light ml-2">Kz</span></h2>
-                        <div className="flex items-center gap-2 justify-center md:justify-start">
-                          <span className="w-2 h-2 rounded-full bg-green-400 status-pulse"></span>
-                          <span className="text-sm font-bold opacity-90">Contador Activo: AO-10932</span>
-                        </div>
-                      </div>
-                      <button onClick={handlePayment} disabled={isPaying} className="z-10 bg-white text-[#C9A646] px-10 py-4 rounded-2xl font-black shadow-xl hover:scale-105 active:scale-95 transition">
-                        {isPaying? 'Processando...' : 'Carregar Agora'}
-                      </button>
-                      <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                    </div>
+        if(next <= 0){
+          setDebt(d => d + Math.abs(next));
+          return 0;
+        }
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border dark:border-slate-800 shadow-sm">
-                        <h3 className="font-bold mb-4 flex items-center gap-2">📊 Consumo Semanal</h3>
-                        <div className="h-48">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={consumptionData}>
-                              <Area type="monotone" dataKey="kwh" stroke="#C9A646" fill="#C9A64633" strokeWidth={4} />
-                              <Tooltip />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </div>
-                      <div className="bg-white dark:bg-slate-900 p-6 rounded-[32px] border dark:border-slate-800 shadow-sm space-y-4">
-                        <h3 className="font-bold">Notificações de Manutenção</h3>
-                        <div className="p-4 bg-orange-50 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900 rounded-2xl flex gap-4">
-                          <span className="text-2xl">⚠️</span>
-                          <p className="text-xs font-medium text-orange-800 dark:text-orange-300">Interrupção programada em Luanda Sul para o dia 25/04 entre as 08h e as 12h.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Admin Dashboard */}
-                  <div className="max-w-6xl mx-auto space-y-8">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      {[
-                        {l: 'Receita Hoje', v: '12.4M Kz', c: 'text-green-500'},
-                        {l: 'Dívida Global', v: '84.1M Kz', c: 'text-red-500'},
-                        {l: 'Clientes Online', v: '1.2M', c: 'text-[#C9A646]'},
-                        {l: 'Postos Activos', v: '4,821', c: 'text-blue-500'}
-                      ].map((s,i) => (
-                        <div key={i} className="bg-white dark:bg-slate-900 p-5 rounded-[24px] border dark:border-slate-800 shadow-sm">
-                          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">{s.l}</p>
-                          <p className={`text-xl font-black ${s.c}`}>{s.v}</p>
-                        </div>
-                      ))}
-                    </div>
+        return next;
+      });
+    },4000);
 
-                    <div className="grid lg:grid-cols-3 gap-8">
-                      {/* Interactive Map Simulation */}
-                      <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-8 rounded-[40px] border dark:border-slate-800 shadow-sm relative min-h-[400px]">
-                        <div className="flex justify-between items-center mb-8">
-                          <div>
-                            <h3 className="text-xl font-black">Mapa de Ocorrências</h3>
-                            <p className="text-xs text-slate-400">Monitorização Geográfica Nacional</p>
-                          </div>
-                          <div className="flex gap-2">
-                            <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-bold tracking-tighter">RED OK</span>
-                          </div>
-                        </div>
+    return ()=>clearInterval(interval);
+  },[]);
 
-                        {/* SVG Map Placeholders */}
-                        <div className="relative h-64 flex items-center justify-center">
-                          <svg viewBox="0 0 200 200" className="w-full h-full max-w-[300px]">
-                            {PROVINCES.map((p, i) => (
-                              <circle
-                                key={p.id}
-                                cx={40 + (i*30)}
-                                cy={50 + (i*15)}
-                                r="12"
-                                fill={p.status === 'Stable'? '#22c55e' : '#ef4444'}
-                                className="map-province"
-                                onClick={() => setSelectedProvince(p)}
-                              />
-                            ))}
-                          </svg>
-                          <div className="absolute bottom-0 left-0 bg-slate-100 dark:bg-slate-800 p-4 rounded-2xl w-full flex justify-between items-center">
-                            <div>
-                              <p className="text-[10px] font-bold uppercase opacity-50">Província Selecionada</p>
-                              <p className="font-black text-lg">{selectedProvince.name}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[10px] font-bold uppercase opacity-50">Status</p>
-                              <p className={`font-black ${selectedProvince.status === 'Stable'? 'text-green-500' : 'text-red-500'}`}>{selectedProvince.status}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Agent Management */}
-                      <div className="bg-white dark:bg-slate-900 p-6 rounded-[40px] border dark:border-slate-800 shadow-sm">
-                        <h3 className="font-bold mb-6">Agentes no Terreno</h3>
-                        <div className="space-y-4">
-                          {[
-                            {n: 'Carlos Bento', z: 'Cazenga', s: 'Em Serviço'},
-                            {n: 'Maria José', z: 'Viana', s: 'Disponível'},
-                            {n: 'António Luíz', z: 'Talatona', s: 'Em Serviço'}
-                          ].map((a,i) => (
-                            <div key={i} className="flex items-center justify-between p-3 border-b dark:border-slate-800 last:border-0">
-                              <div>
-                                <p className="text-sm font-bold">{a.n}</p>
-                                <p className="text-[10px] opacity-50">{a.z}</p>
-                              </div>
-                              <span className={`text-[10px] font-bold px-2 py-1 rounded ${a.s === 'Disponível'? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>{a.s}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Bottom Nav Bar (Mobile UX) */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 glass dark:bg-slate-900/90 border dark:border-slate-800 rounded-full px-8 py-4 shadow-2xl flex gap-12 z-50">
-              <button className="flex flex-col items-center gap-1">
-                <span className="text-xl">🏠</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-[#C9A646]">Geral</span>
-              </button>
-              <button className="flex flex-col items-center gap-1 opacity-30">
-                <span className="text-xl">📄</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest dark:text-white">Faturas</span>
-              </button>
-              <button className="flex flex-col items-center gap-1 opacity-30">
-                <span className="text-xl">🎧</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest dark:text-white">Suporte</span>
-              </button>
-            </div>
-
-          </div>
-        </div>
-      );
+  // lógica energia
+  useEffect(()=>{
+    if(balance <= 0 || debt > 20000){
+      setPower(false);
+    } else {
+      setPower(true);
     }
+  },[balance,debt]);
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+  // score cliente
+  const score = useMemo(()=>{
+    if(debt < 5000) return "Bom";
+    if(debt < 15000) return "Risco";
+    return "Crítico";
+  },[debt]);
+
+  // gráfico
+  const chart = useMemo(()=>{
+    return Array.from({length:7},(_,i)=>({
+      day:`Dia ${i+1}`,
+      kwh: Math.floor(Math.random()*60)+10
+    }));
+  },[]);
+
+  // pagamento
+  const pay = ()=>{
+    if(isPaying) return;
+
+    setIsPaying(true);
+
+    setTimeout(()=>{
+      let amount = 10000;
+
+      if(debt > 0){
+        if(amount >= debt){
+          amount -= debt;
+          setDebt(0);
+          setBalance(b=>b+amount);
+        }else{
+          setDebt(d=>d-amount);
+        }
+      }else{
+        setBalance(b=>b+amount);
+      }
+
+      setIsPaying(false);
+    },1500);
+  };
+
+  if(view === 'landing'){
+    return (
+      <div className="h-screen flex items-center justify-center gold text-white text-center">
+        <div>
+          <h1 className="text-4xl font-bold mb-6">ENDE+ Inteligente</h1>
+          <button onClick={()=>{setRole('customer');setView('app')}} className="bg-white text-black px-6 py-3 m-2 rounded">Cliente</button>
+          <button onClick={()=>{setRole('admin');setView('app')}} className="bg-black text-white px-6 py-3 m-2 rounded">Admin</button>
+        </div>
+      </div>
+    );
+  }
+
+  return(
+    <div className="p-6 space-y-6">
+
+      {role === 'customer' && (
+        <div className="max-w-xl mx-auto space-y-6">
+
+          <div className="gold text-white p-6 rounded-3xl">
+
+            <h2 className="text-4xl font-bold">{balance} Kz</h2>
+            <p>Dívida: {debt} Kz</p>
+
+            <p className={power ? "text-green-200" : "text-red-300"}>
+              {power ? "Energia Activa" : "Energia Cortada"}
+            </p>
+
+            <p>Score: {score}</p>
+
+            <button onClick={pay} className="mt-4 bg-white text-black px-5 py-2 rounded">
+              {isPaying ? "Processando..." : "Pagar (Multicaixa)"}
+            </button>
+
+          </div>
+
+          <div className="bg-white p-4 rounded-xl">
+            <h3 className="font-bold mb-2">Consumo</h3>
+
+            <div style={{height:200}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chart}>
+                  <Area dataKey="kwh" stroke="#C9A646" fill="#C9A64633"/>
+                  <Tooltip/>
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {role === 'admin' && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          {[
+            {l:"Receita Recuperada",v:"5.2M Kz"},
+            {l:"Dívida Total",v:"120M Kz"},
+            {l:"Cortes Automáticos",v:"8,421"},
+            {l:"Perdas Evitadas",v:"3.8M Kz"}
+          ].map((s,i)=>(
+            <div key={i} className="bg-white p-4 rounded-xl">
+              <p className="text-xs">{s.l}</p>
+              <p className="font-bold">{s.v}</p>
+            </div>
+          ))}
+
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
+
+</script>
 </body>
 </html>
